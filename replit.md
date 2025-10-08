@@ -47,14 +47,18 @@ O sistema possui 3 tipos de perfis:
 2. **Vendedor**: Visualização e gestão dos leads atribuídos
 3. **Indicador**: Criação e acompanhamento de leads indicados
 
-## Usuários de Teste
+## Usuários Cadastrados
 
-Após executar `/seed` no backend, os seguintes usuários ficam disponíveis:
+### Gestor:
+- **Gestor Admin**: gestor@indicavende.me / gestor123
 
-- **Admin (Gestor)**: admin@indicavende.me / admin123
-- **Juliano (Vendedor)**: juliano@indicavende.me / seller123
-- **Pedro (Indicador)**: pedro@indicavende.me / indicator123
-- **Daniela (Vendedor)**: daniela@indicavende.me / seller123
+### Vendedores:
+- **João Silva**: joao@indicavende.me / vendedor123
+- **Maria Santos**: maria@indicavende.me / vendedora123
+
+### Indicadores:
+- **Carlos Oliveira**: carlos@indicavende.me / indicador123
+- **Ana Paula**: ana@indicavende.me / indicadora123
 
 ## Configuração Atual
 
@@ -99,12 +103,33 @@ Após executar `/seed` no backend, os seguintes usuários ficam disponíveis:
 ✅ Frontend renderizando tela de login corretamente
 ✅ API backend respondendo às requisições
 
+## Funcionalidades do Dashboard do Gestor
+
+O dashboard do gestor possui as seguintes funcionalidades:
+
+### 📊 Estatísticas Avançadas:
+- **Medidas de Tendência Central**: Média, Mediana e Moda
+- **Medidas de Dispersão**: Amplitude, Desvio Padrão e Intervalo de Confiança (95%)
+- **Forma da Distribuição**: Assimetria (Skewness) e Curtose (Kurtosis)
+
+### 🔄 Atualização em Tempo Real:
+- **Botão de Atualização Manual**: Atualiza os dados instantaneamente
+- **Atualização Automática**: Opção para ativar atualização periódica
+- **Intervalos Configuráveis**: 10, 30, 60 ou 120 segundos
+- **Dados Sempre Atualizados**: Conecta diretamente ao banco de dados
+
+### 📈 Visualizações:
+- **Distribuição de Leads**: Histograma interativo com explicações didáticas
+- **Métricas Visuais**: Cards com indicadores principais
+- **Explicações Detalhadas**: Guia completo sobre como interpretar cada estatística
+
 ## Como Usar
 
 1. Os workflows já estão configurados e rodando automaticamente
 2. Acesse a interface web (porta 5000) para fazer login
-3. Use as credenciais dos usuários de teste listados acima
+3. Use as credenciais dos usuários listados acima
 4. Cada perfil terá acesso a funcionalidades específicas
+5. No dashboard do gestor, ative "🔄 Atualização Automática" para ver dados em tempo real
 
 ## Endpoints da API
 

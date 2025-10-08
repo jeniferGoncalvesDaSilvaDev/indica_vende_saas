@@ -5,6 +5,7 @@ from datetime import datetime
 import numpy as np 
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+import time
 def show_gestor_interface():
     menu = st.sidebar.selectbox("Menu Gestor", ["Dashboard", "Leads", "Usuários"])
     
@@ -17,6 +18,32 @@ def show_gestor_interface():
 
 def show_gestor_dashboard():
     st.header("📊 Dashboard Executivo")
+    
+    # Controles de atualização
+    col1, col2, col3 = st.columns([2, 2, 1])
+    
+    with col1:
+        auto_refresh = st.checkbox("🔄 Atualização Automática", value=False, key="auto_refresh")
+    
+    with col2:
+        if auto_refresh:
+            refresh_interval = st.selectbox(
+                "Intervalo de atualização",
+                options=[10, 30, 60, 120],
+                format_func=lambda x: f"{x} segundos",
+                key="refresh_interval"
+            )
+    
+    with col3:
+        if st.button("🔄 Atualizar Agora", use_container_width=True):
+            st.rerun()
+    
+    # Auto-refresh logic
+    if auto_refresh:
+        time.sleep(refresh_interval)
+        st.rerun()
+    
+    st.markdown("---")
 
     response = make_authenticated_request("/leads/")
     if response and response.status_code == 200:
