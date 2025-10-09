@@ -1,3 +1,4 @@
+
 import streamlit as st
 from auth import get_current_user, make_authenticated_request
 import pandas as pd
@@ -6,6 +7,7 @@ import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 import time
+
 def show_gestor_interface():
     menu = st.sidebar.selectbox("Menu Gestor", ["Dashboard", "Leads", "Usuários"])
     
@@ -58,7 +60,7 @@ def show_gestor_dashboard():
             lead['created_date'] = datetime.strptime(lead['created_at'][:10], '%Y-%m-%d')
 
         # ===== MÉTRICAS PRINCIPAIS =====
-        st.subheader("📈 Visão Geral")
+        st.subheader("📈 Visão Geral de Performance")
 
         total_leads = len(leads)
         fechados = len([l for l in leads if l['status'] == 'fechado'])
@@ -76,7 +78,7 @@ def show_gestor_dashboard():
         st.markdown("---")
 
         # ===== ESTATÍSTICAS DESCRITIVAS =====
-        st.subheader("📐 Estatísticas Descritivas dos Leads")
+        st.subheader("📊 Análise Inteligente de Performance")
 
         df_leads = pd.DataFrame(leads)
         df_leads['data'] = pd.to_datetime(df_leads['created_at'], format='ISO8601').dt.date
@@ -111,91 +113,235 @@ def show_gestor_dashboard():
                 ic_superior = media + margem_erro
 
             # Exibir métricas em cards - Linha 1
-            col1, col2, col3, col4, col5 = st.columns(5)
+            col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.metric("📊 Média de Leads/Dia", f"{media:.2f}")
+                st.metric("📊 Média Diária", f"{media:.1f} leads/dia")
             with col2:
-                st.metric("📏 Mediana", f"{mediana:.1f}")
+                st.metric("📏 Valor Central (Mediana)", f"{mediana:.0f} leads")
             with col3:
-                st.metric("🎯 Moda", f"{moda:.0f}")
+                st.metric("🎯 Resultado Mais Comum", f"{moda:.0f} leads")
             with col4:
-                st.metric("📈 Amplitude", f"{minimo:.0f} - {maximo:.0f}")
-            with col5:
-                st.metric("📊 Desvio Padrão", f"{desvio_padrao:.2f}")
+                st.metric("📈 Variação", f"{minimo:.0f} a {maximo:.0f} leads")
             
             # Exibir métricas adicionais - Linha 2
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("🔄 Assimetria", f"{assimetria:.2f}")
+                variacao_percentual = (desvio_padrao / media * 100) if media > 0 else 0
+                st.metric("📊 Estabilidade", f"±{desvio_padrao:.1f} leads", 
+                         delta=f"{variacao_percentual:.0f}% de variação")
             with col2:
-                st.metric("📐 Curtose", f"{curtose:.2f}")
-            with col3:
                 if graus_liberdade > 0:
-                    st.metric("📊 Intervalo de Confiança 95%", f"[{ic_inferior:.2f}, {ic_superior:.2f}]")
+                    st.metric("🎯 Meta Realista (95% confiança)", f"{ic_inferior:.1f} a {ic_superior:.1f}")
                 else:
-                    st.metric("📊 Intervalo de Confiança 95%", "N/A")
+                    st.metric("🎯 Meta Realista (95% confiança)", "N/A")
+            with col3:
+                # Interpretação da previsibilidade
+                if abs(assimetria) < 0.5:
+                    previsibilidade = "Alta"
+                    emoji = "🟢"
+                elif abs(assimetria) < 1:
+                    previsibilidade = "Média"
+                    emoji = "🟡"
+                else:
+                    previsibilidade = "Baixa"
+                    emoji = "🔴"
+                st.metric("🔮 Previsibilidade", f"{emoji} {previsibilidade}")
 
-            # Incluir explicações didáticas
+            # Explicações contextualizadas
+            st.markdown("---")
+            st.subheader("💡 O que esses números significam para o seu negócio?")
+            
+            # Card 1 - Performance Atual
+            with st.container():
+                st.markdown(f"""
+                ### 📊 **Cenário Atual da Geração de Leads**
+                
+                **Sua operação está gerando em média {media:.1f} leads por dia.** Isso significa que, se mantiver o ritmo atual, 
+                você pode esperar aproximadamente **{media * 30:.0f} leads por mês** e **{media * 365:.0f} leads por ano**.
+                
+                - 📌 **Dia típico:** {mediana:.0f} leads (metade dos dias tem mais, metade tem menos)
+                - 🎯 **Cenário mais frequente:** {moda:.0f} leads (o número que mais se repete)
+                - 📈 **Melhor dia:** {maximo:.0f} leads
+                - 📉 **Pior dia:** {minimo:.0f} leads
+                """)
+            
+            # Card 2 - Estabilidade
+            with st.container():
+                if variacao_percentual < 30:
+                    estabilidade_texto = "**EXCELENTE** - Seus resultados são muito consistentes"
+                    cor_estabilidade = "🟢"
+                    conselho_estabilidade = "Continue com as estratégias atuais, pois estão trazendo resultados previsíveis."
+                elif variacao_percentual < 50:
+                    estabilidade_texto = "**BOA** - Existe alguma variação, mas é controlável"
+                    cor_estabilidade = "🟡"
+                    conselho_estabilidade = "Identifique os dias com melhor performance e replique as ações nesses dias."
+                else:
+                    estabilidade_texto = "**ATENÇÃO** - Resultados muito variáveis"
+                    cor_estabilidade = "🔴"
+                    conselho_estabilidade = "Foque em criar processos padronizados para estabilizar a geração de leads."
+                
+                st.markdown(f"""
+                ### 📊 **Estabilidade da Operação** {cor_estabilidade}
+                
+                {estabilidade_texto}. Seus resultados variam em **±{desvio_padrao:.1f} leads** em relação à média, 
+                o que representa uma oscilação de **{variacao_percentual:.0f}%**.
+                
+                **O que isso significa:** Em dias normais, você pode esperar entre **{max(0, media - desvio_padrao):.0f}** 
+                e **{media + desvio_padrao:.0f}** leads.
+                
+                💡 **Ação Recomendada:** {conselho_estabilidade}
+                """)
+            
+            # Card 3 - Metas Realistas
+            with st.container():
+                st.markdown(f"""
+                ### 🎯 **Metas Realistas para Planejamento**
+                
+                Com **95% de confiança**, sua operação deve gerar entre **{ic_inferior:.1f}** e **{ic_superior:.1f}** leads por dia.
+                
+                **Como usar essa informação:**
+                - 📋 **Para contratar equipe:** Planeje para {ic_inferior:.0f} leads/dia (cenário conservador)
+                - 💰 **Para projeção de receita:** Use {media:.1f} leads/dia (cenário realista)
+                - 🚀 **Para metas de crescimento:** Almeje {ic_superior:.1f} leads/dia (cenário otimista)
+                
+                🎯 **Meta mensal realista:** Entre **{ic_inferior * 30:.0f}** e **{ic_superior * 30:.0f}** leads
+                """)
+            
+            # Card 4 - Padrão de Comportamento
+            with st.container():
+                if assimetria > 0.5:
+                    padrao = f"Você tem **muitos dias com poucos leads** ({minimo:.0f}-{mediana:.0f}) e **alguns dias excepcionais** com {maximo:.0f} leads."
+                    interpretacao = "Seus picos de performance são raros. Descubra o que aconteceu nos melhores dias e tente replicar."
+                    emoji_padrao = "📈"
+                elif assimetria < -0.5:
+                    padrao = f"Você tem **muitos dias com bons resultados** ({mediana:.0f}-{maximo:.0f}) mas **alguns dias ruins** com apenas {minimo:.0f} leads."
+                    interpretacao = "Sua operação é geralmente forte. Identifique os dias ruins para evitar que se repitam."
+                    emoji_padrao = "📊"
+                else:
+                    padrao = f"Seus resultados são **bem distribuídos** entre {minimo:.0f} e {maximo:.0f} leads, com {mediana:.0f} sendo o ponto central."
+                    interpretacao = "Operação equilibrada e previsível. Foque em aumentar a média mantendo a consistência."
+                    emoji_padrao = "⚖️"
+                
+                if curtose > 1:
+                    concentracao = "Os resultados são muito **concentrados ao redor da média**, com poucos extremos."
+                    acao_curtose = "Seu processo é estável, mas pode estar limitado. Teste novas estratégias para buscar crescimento."
+                elif curtose < -1:
+                    concentracao = "Os resultados são muito **espalhados**, com muitos dias fora do padrão."
+                    acao_curtose = "Alta variabilidade indica falta de processo. Padronize as ações para maior previsibilidade."
+                else:
+                    concentracao = "A distribuição dos resultados é **normal e saudável**."
+                    acao_curtose = "Continue monitorando e ajustando conforme necessário."
+                
+                st.markdown(f"""
+                ### {emoji_padrao} **Padrão de Comportamento dos Leads**
+                
+                **Distribuição:** {padrao}
+                
+                **Concentração:** {concentracao}
+                
+                💡 **Interpretação:** {interpretacao}
+                
+                🎯 **Ação Recomendada:** {acao_curtose}
+                """)
+
+            # Gráfico Visual com Interpretação
+            st.markdown("---")
+            st.subheader("📊 Visualização da Distribuição de Leads")
+            
             st.markdown(f"""
-            ### 📊 Explicação das Estatísticas
+            ### 📈 Como interpretar este gráfico:
             
-            **Medidas de Tendência Central:**
-            - **Média ({media:.2f})**: O número médio de leads gerados por dia. Representa o "centro" dos dados.
-            - **Mediana ({mediana:.1f})**: O valor central quando ordenamos os dias. Metade dos dias tem menos leads, metade tem mais.
-            - **Moda ({moda:.0f})**: O número de leads que aparece com mais frequência. É o cenário mais comum.
+            Este gráfico mostra **quantos dias você teve cada quantidade de leads**.
             
-            **Medidas de Dispersão:**
-            - **Amplitude ({minimo:.0f} - {maximo:.0f})**: A diferença entre o menor e maior número de leads. Mostra a variação total.
-            - **Desvio Padrão ({desvio_padrao:.2f})**: Mede o quanto os dados se afastam da média. Valores altos indicam grande variação nos resultados diários.
-            - **Intervalo de Confiança 95% ([{ic_inferior:.2f}, {ic_superior:.2f}])**: Com 95% de confiança, a verdadeira média de leads por dia está neste intervalo. É uma margem de segurança para nossas estimativas.
+            - **Eixo Horizontal (Quantidade de Leads):** Mostra o número de leads gerados
+            - **Eixo Vertical (Número de Dias):** Mostra quantos dias tiveram aquela quantidade
+            - **Barras mais altas:** Indicam quantidades de leads que aconteceram em mais dias (mais comuns)
+            - **Linha vermelha:** Representa sua média de {media:.1f} leads/dia
             
-            **Forma da Distribuição:**
-            - **Assimetria ({assimetria:.2f})**: Indica se a distribuição é simétrica ou não. 
-              - Valor = 0: distribuição perfeitamente simétrica
-              - Valor > 0: mais dias com poucos leads (cauda à direita)
-              - Valor < 0: mais dias com muitos leads (cauda à esquerda)
-            
-            - **Curtose ({curtose:.2f})**: Mede o "achatamento" da distribuição.
-              - Valor = 0: distribuição normal (referência)
-              - Valor > 0: mais concentrada (picos acentuados)
-              - Valor < 0: mais espalhada (achatada)
-            
-            💡 **Dica**: Estas estatísticas ajudam a entender padrões e tomar decisões estratégicas baseadas em dados reais.
-            """)
-
-            # Gerar o histograma
-            st.subheader("📊 Distribuição de Leads")
-            
-            st.markdown("""
-            **O que é este gráfico?**
-            
-            Este histograma mostra visualmente como os leads se distribuem ao longo dos dias. Cada barra representa quantos dias 
-            tiveram um determinado número de leads.
-            
-            **Como interpretar:**
-            - **Eixo X (Quantidade de Leads)**: Mostra o número de leads gerados
-            - **Eixo Y (Frequência)**: Mostra quantos dias tiveram aquela quantidade de leads
-            - **Altura das barras**: Barras mais altas indicam que aquele número de leads é mais comum
-            - **Formato geral**: Se o gráfico é simétrico, assimétrico, concentrado ou espalhado
-            
-            💡 Use este gráfico para identificar padrões: dias típicos têm quantos leads? Existem dias excepcionais?
+            💡 **O que procurar:**
+            - Se as barras estão concentradas perto da média = **operação estável**
+            - Se as barras estão espalhadas = **operação com muita variação**
+            - Se tem barras muito à direita = **você teve dias excepcionais**
             """)
             
-            fig, ax = plt.subplots(figsize=(10, 6))
-            leads_por_dia_series.plot(kind='hist', bins=30, ax=ax, alpha=0.7, color='#1E88E5')
-            ax.set_title("Distribuição dos Leads por Dia", fontsize=14, fontweight='bold')
-            ax.set_xlabel("Quantidade de Leads", fontsize=12)
-            ax.set_ylabel("Frequência (Número de Dias)", fontsize=12)
-            ax.grid(axis='y', alpha=0.3)
+            fig, ax = plt.subplots(figsize=(12, 6))
+            
+            # Histograma
+            n, bins, patches = ax.hist(leads_por_dia_series, bins=min(30, len(leads_por_dia_series)), 
+                                       alpha=0.7, color='#1E88E5', edgecolor='black', linewidth=1.2)
+            
+            # Linha da média
+            ax.axvline(media, color='red', linestyle='--', linewidth=2, 
+                      label=f'Média: {media:.1f} leads/dia', alpha=0.8)
+            
+            # Área de confiança
+            if graus_liberdade > 0:
+                ax.axvspan(ic_inferior, ic_superior, alpha=0.2, color='green', 
+                          label=f'Zona de confiança 95%: {ic_inferior:.1f} - {ic_superior:.1f}')
+            
+            ax.set_title("Distribuição de Leads por Dia - Análise Visual", fontsize=16, fontweight='bold', pad=20)
+            ax.set_xlabel("Quantidade de Leads por Dia", fontsize=13, fontweight='bold')
+            ax.set_ylabel("Quantidade de Dias", fontsize=13, fontweight='bold')
+            ax.legend(loc='upper right', fontsize=11, framealpha=0.9)
+            ax.grid(axis='y', alpha=0.3, linestyle='--')
+            
+            # Destacar barra mais alta
+            max_height = max(n)
+            for i, patch in enumerate(patches):
+                if patch.get_height() == max_height:
+                    patch.set_facecolor('#FF9800')
+                    patch.set_edgecolor('black')
+                    patch.set_linewidth(2)
+            
             st.pyplot(fig)
+            
+            # Resumo Executivo Final
+            st.markdown("---")
+            st.subheader("📋 Resumo Executivo - Ações Prioritárias")
+            
+            acoes = []
+            
+            # Ação 1 - Baseada na taxa de conversão
+            if taxa_conversao < 20:
+                acoes.append("🚨 **URGENTE:** Taxa de conversão baixa. Revise o processo de vendas e qualificação dos leads.")
+            elif taxa_conversao < 40:
+                acoes.append("⚠️ **IMPORTANTE:** Taxa de conversão pode melhorar. Treine a equipe e aprimore o follow-up.")
+            else:
+                acoes.append("✅ **PARABÉNS:** Excelente taxa de conversão! Foque em aumentar o volume de leads.")
+            
+            # Ação 2 - Baseada na estabilidade
+            if variacao_percentual > 50:
+                acoes.append("📊 **PADRONIZAR:** Crie processos fixos para reduzir a variação nos resultados.")
+            elif variacao_percentual > 30:
+                acoes.append("🔧 **OTIMIZAR:** Identifique e replique as ações dos melhores dias.")
+            else:
+                acoes.append("🎯 **ESCALAR:** Operação estável. Hora de investir em crescimento.")
+            
+            # Ação 3 - Baseada no volume
+            if media < 5:
+                acoes.append("📈 **CRESCER:** Volume baixo de leads. Invista em marketing e aquisição.")
+            elif media < 20:
+                acoes.append("💪 **EXPANDIR:** Volume moderado. Explore novos canais de aquisição.")
+            else:
+                acoes.append("🚀 **MANTER:** Excelente volume. Foque em manter a qualidade.")
+            
+            for i, acao in enumerate(acoes, 1):
+                st.markdown(f"**{i}.** {acao}")
 
-            # Fornecer tabela para download
-            st.subheader("📥 Download dos Dados de Leads")
+            # Download dos Dados
+            st.markdown("---")
+            st.subheader("📥 Exportar Dados")
             csv = df_leads.to_csv(index=False)
-            st.download_button("Baixar Dados como CSV", csv, "leads.csv", "text/csv")
+            st.download_button(
+                label="⬇️ Baixar Relatório Completo (CSV)",
+                data=csv,
+                file_name=f"relatorio_leads_{datetime.now().strftime('%Y%m%d')}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
 
         else:
-            st.info("📊 Dados insuficientes para calcular estatísticas descritivas. Aguarde mais leads serem cadastrados.")
+            st.info("📊 Dados insuficientes para calcular estatísticas. Aguarde mais leads serem cadastrados.")
 
         st.markdown("---")
     else:
