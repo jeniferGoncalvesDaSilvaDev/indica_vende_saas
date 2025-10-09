@@ -13,7 +13,7 @@ def send_welcome_email(user_email: str, user_name: str) -> bool:
         # Configurações do servidor SMTP (usando variáveis de ambiente)
         smtp_server = os.getenv("SMTP_SERVER", "smtp.smtp2go.com")
         smtp_port = int(os.getenv("SMTP_PORT", "2525"))
-        sender_email = os.getenv("SENDER_EMAIL", "jeyjey")
+        sender_email = os.getenv("SENDER_EMAIL", "jeyjey.com")
         sender_password = os.getenv("SENDER_PASSWORD", "kjcd5588J#")
         
         # Se não houver configuração de email, não envia (modo desenvolvimento)
