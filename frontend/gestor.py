@@ -299,6 +299,42 @@ def show_gestor_dashboard():
             st.markdown("---")
             st.subheader("📋 Resumo Executivo - Ações Prioritárias")
             
+            # Explicação do Resumo Executivo
+            with st.expander("ℹ️ O que é o Resumo Executivo? Clique para entender", expanded=False):
+                st.markdown("""
+                ### 📋 O que é o Resumo Executivo?
+                
+                O **Resumo Executivo** apresenta as **3 ações mais importantes** que você deve tomar com base nos dados analisados. 
+                É como um "roteiro de prioridades" gerado automaticamente pelo sistema.
+                
+                ### 🎯 Como funciona?
+                
+                O sistema analisa automaticamente três aspectos principais do seu negócio:
+                
+                #### 1️⃣ **Análise da Taxa de Conversão** (Fechamentos ÷ Total de Leads)
+                
+                - **Abaixo de 20%:** 🚨 URGENTE - Revise o processo de vendas
+                - **Entre 20% e 40%:** ⚠️ IMPORTANTE - Treine a equipe
+                - **Acima de 40%:** ✅ PARABÉNS - Foque em aumentar o volume
+                
+                #### 2️⃣ **Análise da Estabilidade** (Variação nos resultados)
+                
+                - **Variação > 50%:** 📊 PADRONIZAR - Crie processos fixos
+                - **Variação 30-50%:** 🔧 OTIMIZAR - Replique os melhores dias
+                - **Variação < 30%:** 🎯 ESCALAR - Hora de crescer
+                
+                #### 3️⃣ **Análise do Volume** (Média de leads por dia)
+                
+                - **Menos de 5 leads/dia:** 📈 CRESCER - Invista em marketing
+                - **Entre 5 e 20 leads/dia:** 💪 EXPANDIR - Explore novos canais
+                - **Mais de 20 leads/dia:** 🚀 MANTER - Foque na qualidade
+                
+                ### 💡 Por que isso é importante?
+                
+                Como gestor, você não precisa ser especialista em estatística. O sistema **traduz números complexos em ações práticas** 
+                que você pode implementar imediatamente. É como ter um consultor de negócios 24/7 analisando seus dados!
+                """)
+            
             acoes = []
             
             # Ação 1 - Baseada na taxa de conversão
