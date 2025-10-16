@@ -54,4 +54,4 @@ localPort = 8000
 externalPort = 8000
 
 [deployment]
-run = ["sh", "-c", "sh -c 'cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000 & cd frontend && streamlit run app.py --server.port=${PORT:-8501} --server.address=0.0.0.0 --server.headless=true --server.enableCORS=false'"]
+run = ["sh", "-c", "sh -c 'cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000 & sleep 3 && cd frontend && streamlit run app.py --server.port=${PORT:-8501} --server.address=0.0.0.0 --server.headless=true --server.enableCORS=false --server.enableXsrfProtection=false'"]
