@@ -3,7 +3,11 @@ import streamlit as st
 import os
 
 # Detecta automaticamente o ambiente
-if os.getenv("REPLIT_DEPLOYMENT"):
+# Para Streamlit Cloud, use a variável de ambiente BACKEND_URL
+if os.getenv("STREAMLIT_SHARING_MODE"):
+    # Streamlit Cloud deployment - precisa apontar para backend deployado
+    BASE_URL = os.getenv("BACKEND_URL", "https://your-backend-url.replit.app")
+elif os.getenv("REPLIT_DEPLOYMENT"):
     # Deployment Replit - backend roda em http://localhost:8000
     BASE_URL = "http://localhost:8000"
 elif os.getenv("REPL_SLUG"):
