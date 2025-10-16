@@ -4,10 +4,12 @@ import os
 
 # Detecta automaticamente se está em produção (Streamlit Cloud/Replit Deploy)
 if os.getenv("REPL_SLUG"):
-    # Ambiente Replit - usa o backend na porta 8000
-    BASE_URL = os.getenv("BACKEND_URL", "https://${REPL_SLUG}.${REPL_OWNER}.repl.co:8000")
+    # Ambiente Replit Deploy - backend na mesma URL mas porta 8000
+    repl_slug = os.getenv("REPL_SLUG")
+    repl_owner = os.getenv("REPL_OWNER")
+    BASE_URL = f"https://{repl_slug}-{repl_owner}.replit.app:8000"
 else:
-    # Desenvolvimento local
+    # Desenvolvimento local ou variável de ambiente customizada
     BASE_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 def login(email: str, password: str):
