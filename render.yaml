@@ -5,8 +5,9 @@ services:
     region: oregon
     plan: free
 
+    rootDir: backend  # 👈 diz ao Render que o código e o requirements estão dentro de /backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
     envVars:
       - key: PYTHON_VERSION
@@ -16,6 +17,6 @@ services:
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "60"
       - key: DATABASE_URL
-        value: "sqlite:///./backend/app.db"
+        value: "sqlite:///./app.db"
 
     autoDeploy: true
